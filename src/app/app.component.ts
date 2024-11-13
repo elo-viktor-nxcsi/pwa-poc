@@ -1,4 +1,11 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  HostListener,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgIf, NgStyle } from '@angular/common';
 import { BeforeInstallPromptEvent } from './BeforeInstallPromptEvent';
@@ -11,26 +18,36 @@ import { Html5QrcodeError } from 'html5-qrcode/core';
   imports: [RouterOutlet, NgIf, NgStyle],
   templateUrl: './app.component.html',
 })
-export class AppComponent implements OnInit {
-  title = 'pwa-poc';
+export class AppComponent {
+  isPwaInstalled = signal<boolean>(false);
+  qrCodeScanResult = signal<string>('');
+  shouldShowQrCodeScanner = computed<boolean>(() => {
+    return this.isPwaInstalled() && this.qrCodeScanResult() === '';
+  });
   deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
-  isPwaInstalled = false;
   html5QrcodeScanner: Html5Qrcode | null = null;
-  qrCodeScanResult = '';
 
-  ngOnInit() {
-    this.html5QrcodeScanner = new Html5Qrcode('reader');
-    void this.html5QrcodeScanner.start(
-      { facingMode: 'environment' },
-      { fps: 10, qrbox: { width: 250, height: 250 } },
-      this.onScanSuccess.bind(this),
-      this.onScanFailure.bind(this),
-    );
+  constructor() {
+    effect(() => {
+      if (this.shouldShowQrCodeScanner()) {
+        this.html5QrcodeScanner = new Html5Qrcode('reader');
+        void this.html5QrcodeScanner
+          ?.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            this.onScanSuccess.bind(this),
+            this.onScanFailure.bind(this),
+          )
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    });
   }
 
   @HostListener('window:DOMContentLoaded', ['$event'])
   onContentLoaded(e: Event) {
-    this.isPwaInstalled = this.checkIfPwaInstalled();
+    this.isPwaInstalled.set(this.checkIfPwaInstalled());
     console.log('isDomContentLoaded', e);
   }
 
@@ -44,12 +61,12 @@ export class AppComponent implements OnInit {
   @HostListener('window:appinstalled', ['$event'])
   onAppInstalled(e: Event) {
     this.deferredInstallPrompt = null;
-    this.isPwaInstalled = true;
+    this.isPwaInstalled.set(true);
     console.log('PWA was installed');
   }
 
   async triggerInstallPrompt() {
-    if (!this.isPwaInstalled) {
+    if (!this.isPwaInstalled()) {
       // iOS does not support install prompting, user must manually add to home screen
       this.deferredInstallPrompt?.prompt();
       const result = await this.deferredInstallPrompt?.userChoice;
@@ -58,7 +75,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  checkIfPwaInstalled() {
+  checkIfPwaInstalled(): boolean {
     const UA = navigator.userAgent;
     const IOS = UA.match(/iPhone|iPad|iPod/);
     const ANDROID = UA.match(/Android/);
@@ -72,7 +89,7 @@ export class AppComponent implements OnInit {
   onScanSuccess(decodedText: string, decodedResult: Html5QrcodeResult) {
     // handle the scanned code as you like, for example:
     console.log(`Code matched = ${decodedText}`, decodedResult);
-    this.qrCodeScanResult = decodedText;
+    this.qrCodeScanResult.set(decodedText);
     this.html5QrcodeScanner
       ?.stop()
       .then((ignore) => {
@@ -87,9 +104,5 @@ export class AppComponent implements OnInit {
     // handle scan failure, usually better to ignore and keep scanning.
     // for example:
     // console.error(`Code scan error: ${errorMessage}`, error);
-  }
-
-  shouldShowQrCodeScanner(): boolean {
-    return this.isPwaInstalled && this.qrCodeScanResult === '';
   }
 }
