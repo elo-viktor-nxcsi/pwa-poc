@@ -5,7 +5,6 @@
  * @deprecated Only supported on Chrome and Android Webview.
  */
 export interface BeforeInstallPromptEvent extends Event {
-
   /**
    * Returns an array of DOMString items containing the platforms on which the event was dispatched.
    * This is provided for user agents that want to present a choice of versions to the user such as,
@@ -18,8 +17,8 @@ export interface BeforeInstallPromptEvent extends Event {
    * Returns a Promise that resolves to a DOMString containing either "accepted" or "dismissed".
    */
   readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed',
-    platform: string
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
   }>;
 
   /**
@@ -27,5 +26,4 @@ export interface BeforeInstallPromptEvent extends Event {
    * This method returns a Promise.
    */
   prompt(): Promise<void>;
-
 }

@@ -8,7 +8,6 @@ import { BeforeInstallPromptEvent } from './BeforeInstallPromptEvent';
   standalone: true,
   imports: [RouterOutlet, NgIf],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
   title = 'pwa-poc';
@@ -35,6 +34,7 @@ export class AppComponent implements OnInit {
 
   async triggerInstallPrompt() {
     if (!this.isPwaInstalled) {
+      // iOS does not support install prompting, user must manually add to home screen
       this.deferredInstallPrompt?.prompt();
       const result = await this.deferredInstallPrompt?.userChoice;
       console.log(`User response to the install prompt: ${result?.outcome}`);
