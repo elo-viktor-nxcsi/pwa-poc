@@ -11,4 +11,14 @@
   </div>
 </main>
 
+<div
+  id="reader"
+  [ngStyle]="{
+    width: '400px',
+    display: shouldShowQrCodeScanner() ? 'block' : 'none',
+  }"
+></div>
+
+<h1 *ngIf="qrCodeScanResult">Scanned text: {{ qrCodeScanResult }}</h1>
+
 <router-outlet />
