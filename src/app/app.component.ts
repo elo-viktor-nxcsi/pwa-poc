@@ -11,6 +11,7 @@ import { NgIf, NgStyle } from '@angular/common';
 import { BeforeInstallPromptEvent } from './BeforeInstallPromptEvent';
 import { Html5Qrcode, Html5QrcodeResult } from 'html5-qrcode';
 import { Html5QrcodeError } from 'html5-qrcode/core';
+import { initializeApp } from 'firebase/app';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +27,15 @@ export class AppComponent {
   });
   deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
   html5QrcodeScanner: Html5Qrcode | null = null;
+  firebaseConfig = {
+    apiKey: "AIzaSyCjBzhnQpY0FWQnl6hqu2OxV57RDfBOZpc",
+    authDomain: "pwa-poc-nx.firebaseapp.com",
+    projectId: "pwa-poc-nx",
+    storageBucket: "pwa-poc-nx.firebasestorage.app",
+    messagingSenderId: "42534205474",
+    appId: "1:42534205474:web:32fbf0363deaca609a327b"
+  };
+  app = initializeApp(this.firebaseConfig);
 
   constructor() {
     effect(() => {

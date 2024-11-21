@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.pwa_poc_nx.web",
+        "sha256_cert_fingerprints": ["83:EE:D7:81:C0:B3:61:6E:3F:5C:9B:24:91:76:4B:5A:93:0E:B2:1E:B4:C9:05:25:50:35:71:FE:DD:3B:23:19"]
+      }
+    }]
